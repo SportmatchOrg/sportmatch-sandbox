@@ -1,0 +1,76 @@
+name: Traductor de PR a negocio
+
+# Al abrir/actualizar un PR, traduce el cambio a lenguaje de negocio
+# (qué historia implementa, riesgo, qué probar) y lo postea como comentario
+# del PR + aviso en Discord. Usa GitHub Models (gratis).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  models: read
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Obtener diff y título del PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr view "$PR" --json title,body,headRefName > meta.json
+          gh pr diff "$PR" > diff.txt || echo "(sin diff)" > diff.txt
+
+      - name: Armar el prompt
+        run: |
+          {
+            echo "Sos el Traductor de PRs a Negocio de SportMatch. Traducí este PR para alguien que NO lee código (PM/PO). Español, sin jerga."
+            echo "Secciones EXACTAS: 'Qué hace este cambio' (2-3 líneas), 'Historia que implementa' (RF-01..RF-06; si no mapea a ninguno marcá ⚠️ fuera de backlog; decí si cubre todos los AC o parte), 'Riesgo' (bajo/medio/alto + por qué; ojo con auth, datos personales RNF-03 y flujos Must), 'Qué probar antes de aprobar' (checklist en lenguaje de usuario)."
+            echo "Breve, cabe en un comentario."
+            echo ""
+            echo "=== META ==="; cat meta.json
+            echo ""
+            echo "=== DIFF ==="; head -c 60000 diff.txt
+          } > prompt.txt
+
+      - name: Generar traducción (GitHub Models)
+        id: ai
+        uses: actions/ai-inference@v1
+        with:
+          model: openai/gpt-4o-mini
+          prompt-file: prompt.txt
+
+      - name: Comentar el PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          RESPONSE: ${{ steps.ai.outputs.response }}
+        run: |
+          printf '### 📊 Resumen para negocio (IA)\n\n%s\n\n---\n*Generado automáticamente. La decisión es humana ("Lab4 no codifica").*' "$RESPONSE" > body.md
+          gh pr comment "$PR" --body-file body.md
+
+      - name: Avisar por Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RESPONSE: ${{ steps.ai.outputs.response }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          msg = f"📊 Nuevo PR traducido a negocio: {os.environ['PR_URL']}\n\n" + os.environ["RESPONSE"]
+          data = json.dumps({"content": msg[:1900]}).encode()
+          req = urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"], data=data,
+                                       headers={"Content-Type": "application/json"})
+          urllib.request.urlopen(req)
+          PY
+
+# Secrets: DISCORD_WEBHOOK_URL  (GITHUB_TOKEN y GitHub Models incluidos)

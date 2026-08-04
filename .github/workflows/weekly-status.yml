@@ -86,7 +86,7 @@ jobs:
           resumen = "📋 Status Report semanal — SportMatch\n" + full[:1500] + "\n… (reporte completo en docs/status-reports/)"
           data = json.dumps({"content": resumen[:1900]}).encode()
           req = urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"], data=data,
-                                       headers={"Content-Type": "application/json"})
+                                       headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (compatible; SportMatchBot/1.0)"})
           urllib.request.urlopen(req)
           PY
 

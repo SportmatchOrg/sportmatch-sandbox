@@ -1,7 +1,7 @@
 name: Sprint Health diario
 
 # Semáforo diario del sprint, posteado en Discord.
-# Usa GitHub Models (gratis, incluido con GITHUB_TOKEN) en vez de una API paga.
+# Usa un LLM OpenAI-compatible (default Gemini free tier) vía .github/scripts/llm.sh.
 # Corre lun-vie 09:00 ART (12:00 UTC). También disparable a mano.
 
 on:
@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  models: read          # habilita GitHub Models
 
 jobs:
   sprint-health:
@@ -49,12 +48,19 @@ jobs:
             echo "=== PRs ABIERTOS ==="; cat prs.json
           } > prompt.txt
 
-      - name: Generar resumen con GitHub Models
+      - name: Generar resumen (LLM OpenAI-compatible, default Gemini)
         id: ai
-        uses: actions/ai-inference@v1
-        with:
-          model: openai/gpt-4o-mini
-          prompt-file: prompt.txt
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          OUT=$(bash .github/scripts/llm.sh prompt.txt)
+          {
+            echo 'response<<EOF_LLM'
+            echo "$OUT"
+            echo 'EOF_LLM'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Postear a Discord
         env:
@@ -69,5 +75,6 @@ jobs:
           urllib.request.urlopen(req)
           PY
 
-# Secrets necesarios: LINEAR_API_KEY, DISCORD_WEBHOOK_URL
-# (GITHUB_TOKEN y GitHub Models vienen incluidos, sin costo extra)
+# Secrets necesarios: LLM_API_KEY (Gemini u otro OpenAI-compatible),
+#                     LINEAR_API_KEY, DISCORD_WEBHOOK_URL
+# Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)

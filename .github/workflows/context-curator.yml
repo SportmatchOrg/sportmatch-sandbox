@@ -3,7 +3,7 @@ name: Curador de contexto (drift AGENTS.md)
 # Al hacer push a dev/main, verifica si AGENTS.md quedó desalineado con el
 # repo real (estructura, stack, convenciones). Si detecta drift, abre un
 # issue con la propuesta + avisa por Discord. NO auto-commitea AGENTS.md
-# (regla "Lab4 no codifica": la decisión es humana). Usa GitHub Models (gratis).
+# (regla "Lab4 no codifica": la decisión es humana). LLM OpenAI-compatible (default Gemini).
 
 on:
   push:
@@ -13,7 +13,6 @@ on:
 permissions:
   contents: read
   issues: write
-  models: read
 
 jobs:
   curator:
@@ -45,12 +44,19 @@ jobs:
             echo "=== REALIDAD DEL REPO ==="; cat repo.txt
           } > prompt.txt
 
-      - name: Evaluar drift (GitHub Models)
+      - name: Evaluar drift (LLM OpenAI-compatible, default Gemini)
         id: ai
-        uses: actions/ai-inference@v1
-        with:
-          model: openai/gpt-4o-mini
-          prompt-file: prompt.txt
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          OUT=$(bash .github/scripts/llm.sh prompt.txt)
+          {
+            echo 'response<<EOF_LLM'
+            echo "$OUT"
+            echo 'EOF_LLM'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Abrir issue + Discord si hay drift
         env:
@@ -75,5 +81,6 @@ jobs:
               urllib.request.urlopen(req)
           PY
 
-# Secrets: DISCORD_WEBHOOK_URL  (GITHUB_TOKEN y GitHub Models incluidos)
+# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_URL
+# Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)
 # La label "documentation" debe existir en el repo (o quitá --label).

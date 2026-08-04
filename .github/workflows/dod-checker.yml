@@ -4,7 +4,7 @@ name: DoD checker
 # Definition of Done y deja el veredicto como comentario del PR + Discord.
 # Nota: en un PR abierto, "PR mergeada" y "deploy a staging" quedan como
 # PENDIENTE (se confirman recién al mergear/deployar). Verifica el resto.
-# Usa GitHub Models (gratis).
+# Usa un LLM OpenAI-compatible (default Gemini free tier) vía .github/scripts/llm.sh.
 
 on:
   pull_request:
@@ -15,7 +15,6 @@ permissions:
   contents: read
   pull-requests: write
   checks: read
-  models: read
 
 jobs:
   dod:
@@ -48,12 +47,19 @@ jobs:
             echo "=== DIFF ==="; head -c 60000 diff.txt
           } > prompt.txt
 
-      - name: Evaluar DoD (GitHub Models)
+      - name: Evaluar DoD (LLM OpenAI-compatible, default Gemini)
         id: ai
-        uses: actions/ai-inference@v1
-        with:
-          model: openai/gpt-4o-mini
-          prompt-file: prompt.txt
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          OUT=$(bash .github/scripts/llm.sh prompt.txt)
+          {
+            echo 'response<<EOF_LLM'
+            echo "$OUT"
+            echo 'EOF_LLM'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comentar el PR
         env:
@@ -79,4 +85,5 @@ jobs:
           urllib.request.urlopen(req)
           PY
 
-# Secrets: DISCORD_WEBHOOK_URL  (GITHUB_TOKEN y GitHub Models incluidos)
+# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_URL
+# Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)

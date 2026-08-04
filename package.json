@@ -1,0 +1,2 @@
+{ "name": "sportmatch-sandbox", "version": "0.0.1",
+  "scripts": { "test": "echo ok", "lint": "echo ok", "build": "echo ok" } }

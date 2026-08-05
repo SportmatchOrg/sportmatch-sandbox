@@ -72,7 +72,7 @@ jobs:
 
       - name: Avisar por Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_QA }}
           RESPONSE: ${{ steps.ai.outputs.response }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
@@ -85,5 +85,5 @@ jobs:
           urllib.request.urlopen(req)
           PY
 
-# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_URL
+# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_QA
 # Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)

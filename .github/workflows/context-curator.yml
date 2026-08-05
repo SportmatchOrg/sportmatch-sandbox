@@ -61,7 +61,7 @@ jobs:
       - name: Abrir issue + Discord si hay drift
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_PLANNING }}
           RESPONSE: ${{ steps.ai.outputs.response }}
         run: |
           if printf '%s' "$RESPONSE" | head -1 | grep -q "SIN CAMBIOS"; then
@@ -81,6 +81,6 @@ jobs:
               urllib.request.urlopen(req)
           PY
 
-# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_URL
+# Secrets: LLM_API_KEY (Gemini u otro OpenAI-compatible), DISCORD_WEBHOOK_PLANNING
 # Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)
 # La label "documentation" debe existir en el repo (o quitá --label).

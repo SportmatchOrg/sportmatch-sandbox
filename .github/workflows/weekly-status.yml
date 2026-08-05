@@ -79,7 +79,7 @@ jobs:
 
       - name: Postear resumen a Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_PROGRESS }}
         run: |
           python3 - <<'PY'
           import json, os, urllib.request
@@ -92,5 +92,5 @@ jobs:
           PY
 
 # Secrets necesarios: LLM_API_KEY (Gemini u otro OpenAI-compatible),
-#                     LINEAR_API_KEY, DISCORD_WEBHOOK_URL
+#                     LINEAR_API_KEY, DISCORD_WEBHOOK_PROGRESS
 # Variables opcionales: LLM_BASE_URL, LLM_MODEL (ver .github/scripts/llm.sh)

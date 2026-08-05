@@ -64,6 +64,19 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_PLANNING }}
           RESPONSE: ${{ steps.ai.outputs.response }}
         run: |
+          if printf '%s' "$RESPONSE" | grep -q "^LLM_UNAVAILABLE"; then
+            echo "LLM no disponible, aviso sin evaluar drift: $RESPONSE"
+            python3 - <<PY
+          import json, os, urllib.request
+          msg = "⚠️ Curador de contexto: LLM no disponible ahora mismo, no se evaluó drift en este run. (${RESPONSE})"
+          data = json.dumps({"content": msg[:1900]}).encode()
+          hook = os.environ.get("DISCORD_WEBHOOK_URL","")
+          if hook:
+              req = urllib.request.Request(hook, data=data, headers={"Content-Type":"application/json","User-Agent":"Mozilla/5.0 (compatible; SportMatchBot/1.0)"})
+              urllib.request.urlopen(req)
+          PY
+            exit 0
+          fi
           if printf '%s' "$RESPONSE" | head -1 | grep -q "SIN CAMBIOS"; then
             echo "AGENTS.md alineado, sin acción."
             exit 0

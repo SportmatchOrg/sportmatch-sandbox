@@ -61,6 +61,10 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           RESPONSE: ${{ steps.ai.outputs.response }}
         run: |
+          if printf '%s' "$RESPONSE" | grep -q "^LLM_UNAVAILABLE"; then
+            echo "LLM no disponible, no se comenta el PR: $RESPONSE"
+            exit 0
+          fi
           printf '### 📊 Resumen para negocio (IA)\n\n%s\n\n---\n*Generado automáticamente. La decisión es humana ("Lab4 no codifica").*' "$RESPONSE" > body.md
           gh pr comment "$PR" --body-file body.md
 
@@ -72,7 +76,11 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, urllib.request
-          msg = f"📊 Nuevo PR traducido a negocio: {os.environ['PR_URL']}\n\n" + os.environ["RESPONSE"]
+          resp = os.environ["RESPONSE"]
+          if resp.startswith("LLM_UNAVAILABLE"):
+              msg = f"⚠️ Traductor de PR a negocio: LLM no disponible ahora mismo, no se tradujo {os.environ['PR_URL']} en este run. ({resp})"
+          else:
+              msg = f"📊 Nuevo PR traducido a negocio: {os.environ['PR_URL']}\n\n" + resp
           data = json.dumps({"content": msg[:1900]}).encode()
           req = urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"], data=data,
                                        headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (compatible; SportMatchBot/1.0)"})

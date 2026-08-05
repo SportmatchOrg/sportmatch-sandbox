@@ -65,7 +65,13 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Guardar y commitear el reporte
+        env:
+          RESPONSE: ${{ steps.ai.outputs.response }}
         run: |
+          if printf '%s' "$RESPONSE" | grep -q "^LLM_UNAVAILABLE"; then
+            echo "LLM no disponible, no se genera el reporte: $RESPONSE"
+            exit 0
+          fi
           mkdir -p docs/status-reports
           FECHA=$(date +%Y-%m-%d)
           cat > "docs/status-reports/$FECHA.md" <<'EOF'
@@ -84,7 +90,10 @@ jobs:
           python3 - <<'PY'
           import json, os, urllib.request
           full = """${{ steps.ai.outputs.response }}"""
-          resumen = "📋 Status Report semanal — SportMatch\n" + full[:1500] + "\n… (reporte completo en docs/status-reports/)"
+          if full.startswith("LLM_UNAVAILABLE"):
+              resumen = f"⚠️ Status Report semanal: LLM no disponible ahora mismo, no se generó el reporte de esta semana. ({full})"
+          else:
+              resumen = "📋 Status Report semanal — SportMatch\n" + full[:1500] + "\n… (reporte completo en docs/status-reports/)"
           data = json.dumps({"content": resumen[:1900]}).encode()
           req = urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"], data=data,
                                        headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (compatible; SportMatchBot/1.0)"})

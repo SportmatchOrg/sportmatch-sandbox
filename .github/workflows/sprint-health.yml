@@ -69,7 +69,11 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, urllib.request
-          msg = """${{ steps.ai.outputs.response }}"""
+          resp = """${{ steps.ai.outputs.response }}"""
+          if resp.startswith("LLM_UNAVAILABLE"):
+              msg = f"⚠️ Sprint Health: LLM no disponible ahora mismo, no se generó el semáforo de hoy. ({resp})"
+          else:
+              msg = resp
           data = json.dumps({"content": msg[:1900]}).encode()
           req = urllib.request.Request(os.environ["DISCORD_WEBHOOK_URL"], data=data,
                                        headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (compatible; SportMatchBot/1.0)"})

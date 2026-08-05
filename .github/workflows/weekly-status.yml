@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write        # para commitear el reporte
+  pull-requests: read
 
 jobs:
   weekly-status:

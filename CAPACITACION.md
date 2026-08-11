@@ -1,24 +1,25 @@
-# Capacitación SportMatch — 6 horas, 100% práctica
+# Capacitación SportMatch — práctica end-to-end
 
-Objetivo: que cada dev, en **~6 h**, entienda para qué sirve cada tecnología del stack y **la use de verdad** sobre un repo que se parece a SportMatch — implementando una feature (uno front, otro back) y pasándola por el flujo **branch → commit → PR → merge** para ver a los **agentes de IA** en acción.
+Objetivo: que cada uno de los **3 devs** entienda para qué sirve cada tecnología del stack y **la use de verdad** sobre un repo que se parece a SportMatch, implementando **la misma feature end-to-end** (base de datos + backend + frontend) y pasándola por el flujo **branch → commit → PR → review** para ver a los **agentes de IA** en acción.
 
-**Reparto del tiempo (por dev):**
+**Por qué la misma tarea para los 3:** además del review del agente, se **comentan los PRs entre ellos** (practican hacer code review, no solo recibirlo) y ven **soluciones distintas al mismo problema**. Sobre el "pisarse": no es problema — el objetivo es interactuar y revisarse, no entregar código. No se intenta mergear los 3 (ahí sí habría conflictos); se mergea **uno solo como referencia** y los otros dos se cierran.
 
-| Bloque | Tiempo | Qué hace |
-|--------|--------|----------|
-| 1. Intro teórica corta | **1–1.5 h** | Ver 1 recurso por tecnología + leer "por qué lo elegimos" |
-| 2. Levantar el repo con Docker | 0.5–1 h | Clonar el starter y `docker compose up` |
-| 3. Implementar la feature | ~2 h | Un dev la de back, el otro la de front |
-| 4. Branch + PR + ver los agentes | ~1 h | Abrir el PR y observar qué comentan los agentes; mergear |
+**El flujo, en 4 bloques:**
+1. Intro teórica corta (1 recurso por tecnología + por qué la elegimos)
+2. Levantar el repo con Docker
+3. Implementar la feature completa (los 3, la misma)
+4. Branch + PR + cross-review + ver los agentes
 
 ---
 
 ## Bloque 1 — Intro teórica corta (1 recurso c/u + por qué lo elegimos)
 
-Solo lo esencial: qué es, dónde lo van a usar en SportMatch y por qué está en el stack. **Un recurso por tecnología.**
+Solo lo esencial: qué es, dónde lo van a usar en SportMatch y por qué está en el stack.
 
 ### TypeScript
-- **Recurso (5 min):** [TypeScript in 5 minutes (oficial)](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+Como ya vienen usando **JavaScript**, acá lo importante es ver **qué agrega TS sobre JS**.
+- **Recurso (~2 min):** [TypeScript in 100 Seconds — Fireship](https://www.youtube.com/watch?v=zQnBQ4tB3ZA)
+
 - **Para qué:** JavaScript con tipos. Detecta errores al escribir, no en producción.
 - **Dónde lo usan:** en TODO — front y back están en TypeScript.
 - **Por qué lo elegimos:** un solo lenguaje para los dos servicios, menos bugs en runtime (ayuda a RNF-04 Resiliencia) y autocompletado que se potencia con Prisma y NestJS.
@@ -30,7 +31,7 @@ Solo lo esencial: qué es, dónde lo van a usar en SportMatch y por qué está e
 - **Por qué lo elegimos:** rapidísimo para construir una web responsiva (RNF-01), ecosistema enorme y deploy simple.
 
 ### NestJS (backend)
-- **Recurso (~6 min):** [What NestJS actually is — no-fluff (DEV)](https://dev.to/ramkashyap2050/what-nestjs-actually-is-a-simple-no-fluff-explanation-3m9e) · alternativa oficial: [First steps](https://docs.nestjs.com/first-steps)
+- **Recurso (~6 min):** [What NestJS actually is — no-fluff (DEV)](https://dev.to/ramkashyap2050/what-nestjs-actually-is-a-simple-no-fluff-explanation-3m9e) · video: [NestJS explicado](https://www.youtube.com/watch?v=0M8AYU_hPas)
 - **Para qué:** framework de Node en TypeScript para APIs, con estructura por módulos e inyección de dependencias.
 - **Dónde lo usan:** la API REST que expone partidos, solicitudes, ratings (RF-03, RF-05, RF-06).
 - **Por qué lo elegimos:** da estructura y "barandas" (módulos + validación con DTOs) en vez de un Express en blanco — ideal para un equipo que recién arranca y para un monolito modular.
@@ -52,7 +53,7 @@ Se usa un **starter que ya combina el stack**, parecido a lo que van a construir
 - **Repo base:** [nest-next-prisma-monorepo-starter](https://github.com/AceTheNinja/nest-next-prisma-monorepo-starter) — Nest.js + Next.js + Prisma + Tailwind en un monorepo.
 
 **Pasos:**
-1. Un manager forkea el starter a un repo del equipo (ej. `sportmatch-playground`), instala el paquete de agentes (`.github/` — ver `README.md`), carga los secrets de test y crea 2 issues en un Linear de test (uno de back, uno de front).
+1. Un manager forkea el starter a un repo del equipo (ej. `sportmatch-playground`), instala el paquete de agentes (`.github/` — ver `README.md`), carga los secrets de test y crea **un issue en Linear** con la feature (la misma para los 3).
 2. Cada dev clona el repo.
 3. `docker compose up` (o el comando que indique el README del starter) → confirmar que **front, back y Postgres** levantan y la app abre en el navegador.
 4. Correr las migraciones/seed de Prisma si el starter lo pide.
@@ -61,41 +62,41 @@ Se usa un **starter que ya combina el stack**, parecido a lo que van a construir
 
 ---
 
-## Bloque 3 — La feature (uno back, uno front)
+## Bloque 3 — La feature (la misma para los 3, end-to-end)
 
-Cada dev toma **una** de estas. Son chicas, a propósito, y calcadas de una historia real de SportMatch.
+Todos implementan **la misma historia completa**, tocando las **tres capas**. Es chica a propósito y está calcada de SportMatch.
 
-### Dev A — Backend: endpoint de partidos (NestJS + Prisma + REST)
-**Tarea:** exponer `GET /partidos` que devuelva partidos desde la base.
-1. En el modelo de Prisma, agregá una entidad `Partido` (`id`, `deporte`, `fecha`, `cupo`) si no existe; corré una **migración** de Prisma.
-2. Sembrá 2-3 partidos de ejemplo (seed).
-3. Creá un **módulo NestJS** `partidos` (controller + service) con `GET /partidos` que use Prisma para devolver la lista.
-4. (Opcional) agregá un DTO con validación para un `POST /partidos`.
+### Feature: "Partidos" — listar partidos de punta a punta
 
-**Criterio de aceptación:** `GET /partidos` responde un JSON con la lista (probado con `curl` o Swagger). Referencia: RF-03.
+**1. Base de datos (Prisma + PostgreSQL)**
+- Agregá al modelo de Prisma una entidad `Partido` (`id`, `deporte`, `fecha`, `cupo`).
+- Corré una **migración** de Prisma.
+- Sembrá 2-3 partidos de ejemplo (seed).
 
-### Dev B — Frontend: pantalla de partidos (Next.js + Tailwind)
-**Tarea:** una página `/partidos` que consuma la API y liste los partidos.
-1. Creá la ruta `/partidos` (App Router).
-2. Hacé fetch a `GET /partidos` del backend.
-3. Renderizá cada partido como una **card con Tailwind**, responsive: 1 columna en mobile, grilla en desktop.
-4. Mostrá un estado de "cargando" y uno de "sin partidos".
+**2. Backend (NestJS + REST) — CRUD de partidos**
+- Creá un **módulo** `partidos` (controller + service) con `GET /partidos` (listar), `POST /partidos` (crear, con DTO validado) y `DELETE /partidos/:id` (eliminar), usando Prisma.
+- Cuando funcionen, **generá tests** sobre esos endpoints y **corrélos** (NestJS usa Jest: `npm test`), y probá los endpoints con **Postman**. Es un adelanto de lo que vamos a pedir en tickets reales.
 
-**Criterio de aceptación:** la página muestra la lista estilada y se ve bien en mobile y desktop (RNF-01). Referencia: RF-04.
+**3. Frontend (Next.js + Tailwind) — vista de partidos tipo swipe**
+- Creá la ruta `/partidos` (App Router) que haga fetch a `GET /partidos`.
+- Mostrá cada partido pensado como **card**, con navegación tipo **swipe** (descartar / abrir siguiente). Libertad total para el diseño: buscá que quede **visualmente atractivo** (esto anticipa la Vista Swipe del proyecto, WBS 7.2).
+- Mantené los estados de "cargando" y "sin partidos".
 
-> Si trabajan en paralelo, el Dev B puede arrancar con datos mock y conectar la API real cuando el Dev A tenga el endpoint.
+**Criterio de aceptación (end-to-end):** los 3 endpoints (GET/POST/DELETE) funcionan y tienen tests que pasan, y la vista `/partidos` muestra las cards con swipe, responsive. Referencias: RF-03 (CRUD de partidos), RF-04 (descubrimiento/swipe), RNF-01 (responsividad).
+
+> Cada dev lo hace **completo y solo**, en su propia rama. Así los 3 pasan por las 3 tecnologías.
 
 ---
 
-## Bloque 4 — Branch → commit → PR → y ver a los agentes
+## Bloque 4 — Branch → commit → PR → cross-review + agentes
 
-Acá está el corazón de la capacitación: que **interactúen con git y vean el efecto de los agentes**.
+Acá está el corazón: interactuar con git, **revisarse entre ellos** y ver el efecto de los agentes.
 
-**Pasos (cada dev con su feature):**
-1. Crear la rama: `git checkout -b feature/RF-03-endpoint-partidos` (back) / `feature/RF-04-pantalla-partidos` (front).
-2. Commitear con la convención del equipo: `feat(RF-03): endpoint GET /partidos`.
+**Pasos (cada dev con su versión de la feature):**
+1. Crear la rama, ej. `feature/partidos-<nombre>` (el nombre evita choques de ramas).
+2. Commitear con la convención del equipo: `feat(RF-03): listar partidos end-to-end`.
 3. `git push` y **abrir un Pull Request** hacia `dev`.
-4. **Observar a los agentes actuar sobre el PR** (esto es lo que van a vivir todo el proyecto):
+4. **Observar a los agentes** sobre cada PR:
 
 | Agente | Qué van a ver |
 |--------|----------------|
@@ -104,21 +105,23 @@ Acá está el corazón de la capacitación: que **interactúen con git y vean el
 | **DoD checker** | El veredicto de Definition of Done (qué cumple y qué falta) |
 | **Curador de contexto** | Si cambiaron el modelo de Prisma (estructura), puede abrir un issue proponiendo actualizar `AGENTS.md` |
 
-5. Un compañero (o el manager) **revisa, aprueba y mergea** el PR → ven el ciclo completo cerrarse.
-6. (Opcional, 10 min) provocar un conflicto simple entre las dos ramas y resolverlo, para practicar `merge`.
+5. **Cross-review:** cada dev revisa y comenta los PRs de los otros dos — comparan enfoques y practican dar feedback (lo que el agente hace, pero ahora ellos).
+6. Se mergea **un solo PR** como solución de referencia; los otros dos se **cierran** (no se intenta mergear los tres → sin conflictos).
+7. (Opcional) provocar y resolver un conflicto simple, para practicar `merge`.
 
-**Cierre (15 min):** mini-demo donde cada dev muestra su PR y qué le comentaron los agentes. Con eso quedan listos para el desarrollo real.
+**Cierre:** mini-demo donde comparan las 3 soluciones y qué les comentaron los agentes. Con eso quedan listos para el desarrollo real.
 
 ---
 
 ## Checklist del dev (para tildar)
 
-- [ ] Vi los 4 intros y leí el "por qué lo elegimos"
+- [ ] Vi el intro de cada tecnología y leí el "por qué lo elegimos"
 - [ ] Levanté el repo con `docker compose up` y abrió en el navegador
-- [ ] Implementé mi feature (front o back) y cumple el criterio de aceptación
+- [ ] Implementé la feature completa: modelo + migración (Prisma), endpoint (NestJS), pantalla (Next.js + Tailwind)
+- [ ] Cumple el criterio de aceptación end-to-end
 - [ ] Creé mi rama, commiteé con la convención y abrí el PR
 - [ ] Vi los comentarios de los agentes en mi PR
-- [ ] Mi PR fue revisado y mergeado
+- [ ] Revisé y comenté los PRs de mis 2 compañeros
 
 ---
 

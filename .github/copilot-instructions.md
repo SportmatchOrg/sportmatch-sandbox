@@ -30,6 +30,15 @@ Al revisar un PR, priorizá en este orden y señalá con severidad `BLOCKER / MA
 
 Sé específico (archivo:línea), constructivo y no ahogues al dev en NITs. Cerrá con un resumen del PR en 2-3 líneas y un veredicto.
 
+## Stack (contexto para revisar y sugerir)
+
+Front **Next.js + TypeScript + Tailwind**, back **NestJS + TypeScript**, DB **PostgreSQL + Prisma**, infra **Docker + Azure**, CI **GitHub Actions**. Front y back son servicios independientes que hablan por **API REST**.
+
 ## Estilo de código
 
-<!-- TODO: completar con linter/formatter una vez elegido el stack (AGENTS.md §4). Ej: ESLint + Prettier, PEP8 + black, etc. -->
+- TypeScript en todo; evitá `any` sin justificar. Aprovechá los tipos de Prisma.
+- ESLint + Prettier en front y back; el CI corre lint + typecheck (no aprobar PRs en rojo).
+- **NestJS:** módulos por feature (controller + service + DTO). Validá la entrada con DTOs + `class-validator`. No metas lógica de negocio en los controllers.
+- **Next.js:** App Router; componentes tipados; estilos con utilidades de Tailwind (evitá CSS suelto salvo necesidad).
+- **Prisma:** todo cambio de esquema va por migración; nunca edites la DB a mano. Ojo con queries N+1 (usá `include`/`select` con criterio).
+- **API REST:** contratos claros y consistentes; valida y maneja errores devolviendo códigos HTTP correctos (RNF-04 Resiliencia).

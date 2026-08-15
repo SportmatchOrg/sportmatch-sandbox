@@ -48,29 +48,36 @@ Reglas de negocio clave: cupos, aprobación manual de solicitudes por el organiz
 
 ## 4. Stack tecnológico
 
-<!-- TODO (WBS 3.1.1): completar una vez elegido el stack -->
+**Arquitectura:** monolito modular, cliente-servidor. Frontend y backend son **servicios independientes** que se comunican por **API REST**.
 
 | Capa | Tecnología | Notas |
 |------|-----------|-------|
-| Frontend | _por definir_ | |
-| Backend | _por definir_ | |
-| Base de datos | _por definir_ | |
-| Hosting / Deploy | _por definir_ | tier gratuito o créditos académicos |
+| Frontend | **Next.js + TypeScript + Tailwind CSS** | Servicio independiente; consume la API REST |
+| Backend | **NestJS + TypeScript** | Servicio independiente; expone la API REST |
+| Base de datos | **PostgreSQL + Prisma (ORM)** | Migraciones y seeds vía Prisma |
+| Infraestructura | **Docker** + **Azure** | Cada servicio containerizado |
+| CI/CD | **GitHub Actions** | build + lint + typecheck (WBS 3.2.3) |
 | Mapa / Geolocalización | Google Maps API | RF-04 |
-| CI | GitHub Actions | build + lint + typecheck (WBS 3.2.3) |
 
 ---
 
 ## 5. Estructura del repositorio
 
-<!-- TODO: actualizar cuando se cree el scaffold (WBS 3.2.1). El context-curator mantiene esta sección. -->
+<!-- El context-curator mantiene esta sección alineada con el scaffold real (WBS 3.2.1). -->
 
 ```
-/            (por definir según stack)
-/.claude/agents/   Subagentes de IA (ver README)
+/frontend/           Next.js + TypeScript + Tailwind (servicio independiente)
+/backend/            NestJS + TypeScript (servicio independiente, API REST)
+/backend/prisma/     schema.prisma, migraciones y seeds
+/docker-compose.yml  Levanta backend + frontend + Postgres en local
+/.github/chatmodes/  Chat modes de Copilot (agentes interactivos)
+/.github/skills/     Agent skills de Copilot (ej. code review)
 /.github/workflows/  CI + agentes automatizados
-/docs/       Documentación técnica y ADRs
+/.github/scripts/    Scripts de soporte (ej. llm.sh)
+/docs/               Documentación técnica y ADRs
 ```
+
+> Estructura sugerida (dos servicios en un mismo repo). Si se decide repos separados para front y back, el context-curator debe reflejarlo aquí.
 
 ---
 
@@ -93,7 +100,12 @@ Reglas de negocio clave: cupos, aprobación manual de solicitudes por el organiz
 - Todos los criterios de aceptación del RF cumplidos
 
 **Naming / estilo de código**
-<!-- TODO: definir según stack (linter, formatter, convención de nombres) -->
+- **Lenguaje:** TypeScript en front y back (nada de `any` sin justificar; aprovechar el tipado que da Prisma).
+- **Lint/format:** ESLint + Prettier en ambos servicios; el CI corre lint y typecheck (no se mergea en rojo).
+- **Backend (NestJS):** organización por módulos/feature (controller + service + DTO + módulo). Validación de entrada con DTOs (`class-validator`).
+- **Frontend (Next.js):** App Router; componentes en PascalCase; estilos con utilidades de Tailwind.
+- **API REST:** rutas en plural y kebab/camel consistente; contratos documentados (Swagger si se usa).
+- **DB:** cambios de esquema siempre vía migración de Prisma (nunca a mano).
 
 ---
 

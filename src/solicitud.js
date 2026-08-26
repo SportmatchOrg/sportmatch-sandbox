@@ -21,3 +21,4 @@ console.log("solicitud creada", solicitarUnirse);
 // b8b
 // b8c
 // b9
+// E2E final

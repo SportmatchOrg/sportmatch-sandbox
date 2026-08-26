@@ -7,3 +7,4 @@ module.exports = { solicitarUnirse };
 console.log("solicitud creada", solicitarUnirse);
 // reintento E2E
 // bisect
+// b1

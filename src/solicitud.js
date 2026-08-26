@@ -22,3 +22,5 @@ console.log("solicitud creada", solicitarUnirse);
 // b8c
 // b9
 // E2E final
+
+const MARGIN_TEST = "mt-4";

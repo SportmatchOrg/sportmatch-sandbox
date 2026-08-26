@@ -6,3 +6,4 @@ module.exports = { solicitarUnirse };
 // TODO: validar que el partido no esté completo antes de aceptar
 console.log("solicitud creada", solicitarUnirse);
 // reintento E2E
+// bisect

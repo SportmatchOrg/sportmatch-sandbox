@@ -12,3 +12,4 @@ console.log("solicitud creada", solicitarUnirse);
 // b3
 // b4
 // b5
+// b6

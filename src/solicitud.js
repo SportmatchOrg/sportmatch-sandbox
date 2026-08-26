@@ -13,3 +13,4 @@ console.log("solicitud creada", solicitarUnirse);
 // b4
 // b5
 // b6
+// E2E real

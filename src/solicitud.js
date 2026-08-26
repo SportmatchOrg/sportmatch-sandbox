@@ -8,3 +8,4 @@ console.log("solicitud creada", solicitarUnirse);
 // reintento E2E
 // bisect
 // b1
+// b2

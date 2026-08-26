@@ -16,3 +16,5 @@ async function enviarSolicitud(solicitud) {
 }
 
 module.exports = { solicitarUnirse, enviarSolicitud, ESTADOS };
+
+// prueba de precedencia de vars

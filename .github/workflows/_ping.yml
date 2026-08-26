@@ -1,0 +1,9 @@
+name: ping
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [dev, main]
+jobs:
+  ping:
+    uses: SportmatchOrg/agents-copilot/.github/workflows/_ping-reusable.yml@main
+    secrets: inherit

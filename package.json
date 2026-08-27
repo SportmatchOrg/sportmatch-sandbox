@@ -1,2 +1,3 @@
 { "name": "sportmatch-sandbox", "version": "0.0.1",
-  "scripts": { "test": "echo ok", "lint": "echo ok", "build": "echo ok" } }
+  "scripts": { "test": "echo ok", "lint": "echo ok", "build": "echo ok" },
+  "dependencies": { "lodash": "^4.17.21" } }

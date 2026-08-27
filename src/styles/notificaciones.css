@@ -1,0 +1,10 @@
+/* Estilos de la tarjeta de notificacion */
+.notificacion-card {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding: 8px;
+}
+
+.notificacion-lista {
+  margin-left: 12px;
+}

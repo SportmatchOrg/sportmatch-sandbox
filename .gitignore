@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.local
+.next/
+dist/
+back/src/generated/
+*.log
+.idea/
+*.iml
+*firebase-adminsdk*.json
+
+# Overrides locales de Docker Compose
+docker-compose.override.yml
+
+# Skills de Claude Code instaladas por cada dev (no son del equipo, son herramientas personales)
+.claude/skills/
+skills-lock.json

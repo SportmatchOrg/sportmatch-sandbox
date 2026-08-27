@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: SportmatchOrg/agents-copilot/.github/workflows/test-agent-reusable.yml@main
+    uses: SportmatchOrg/agents-copilot/.github/workflows/test-agent-reusable.yml@feat/api-test-agent
     with:
       ticket: ${{ inputs.ticket }}
       rf: ${{ inputs.rf }}
@@ -49,4 +49,7 @@ jobs:
       target_repo: SportmatchOrg/sportmatch-sandbox
       base_branch: dev
       service_root: back
+      # Primera corrida contra la rama de desarrollo del agente.
+      # Cuando quede verde, esto y el `uses:` vuelven a @main.
+      agents_ref: feat/api-test-agent
     secrets: inherit

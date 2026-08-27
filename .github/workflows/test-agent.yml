@@ -1,0 +1,55 @@
+name: API Test Agent
+
+# Wrapper. Toda la lógica vive en SportmatchOrg/agents-copilot: acá solo se
+# declara cuándo corre y con qué parámetros.
+#
+# Qué hace: dado un ticket de Linear, genera tests e2e para la API, LOS CORRE
+# de verdad contra Postgres, itera hasta 5 veces, y deja una PR en draft con la
+# cobertura de criterios de aceptación y los posibles bugs que encontró.
+#
+# Se dispara a mano a propósito (plan §3.3): el gasto es una decisión humana.
+# Un loop agéntico automático es la forma más rápida de quemar la cuota diaria
+# de los modelos free sin que nadie se entere.
+#
+# Secrets necesarios en este repo:
+#   LLM_API_KEY    API key de OpenRouter. Sin esto el agente no corre.
+#   LINEAR_API_KEY Opcional pero muy recomendable: sin ella el agente trabaja
+#                  sin criterios de aceptación y la cobertura no se puede medir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticket:
+        description: "Identifier del ticket de Linear (ej. SPM-42)"
+        required: true
+        type: string
+      rf:
+        description: "RF a testear. Vacío = se deduce del ticket."
+        required: false
+        type: string
+        default: ""
+      llm_model_chain:
+        description: "Cadena de modelos free, coma-separada. Vacío = default."
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  test-agent:
+    # Hay que declararlos ACÁ: un workflow llamado solo puede REDUCIR lo que el
+    # llamador le pasa, nunca ampliarlo.
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: SportmatchOrg/agents-copilot/.github/workflows/test-agent-reusable.yml@feat/api-test-agent
+    with:
+      ticket: ${{ inputs.ticket }}
+      rf: ${{ inputs.rf }}
+      llm_model_chain: ${{ inputs.llm_model_chain }}
+      target_repo: SportmatchOrg/sportmatch-sandbox
+      base_branch: dev
+      service_root: back
+      # Primera corrida contra la rama de desarrollo del agente.
+      # Cuando quede verde, esto y el `uses:` vuelven a @main.
+      agents_ref: feat/api-test-agent
+    secrets: inherit

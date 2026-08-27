@@ -1,0 +1,76 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Nivel {
+  PRINCIPIANTE
+  INTERMEDIO
+  AVANZADO
+
+  @@map("nivel")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  firebaseUid String   @unique
+  email       String   @unique
+  nombre      String
+  fotoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  partidosOrganizados Partido[]
+  participaciones Participante[]
+
+  @@map("users")
+}
+
+model Deporte {
+  id        String   @id @default(cuid())
+  nombre    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  partidos Partido[]
+
+  @@map("deportes")
+}
+
+model Partido {
+  id            String   @id @default(cuid())
+  deporteId     String
+  deporte       Deporte  @relation(fields: [deporteId], references: [id])
+  nivel         Nivel
+  fecha         DateTime
+  ubicacion     String
+  cupo          Int
+  descripcion   String?
+  organizadorId String
+  organizador   User     @relation(fields: [organizadorId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  participantes Participante[]
+
+  @@index([fecha])
+  @@index([deporteId])
+  @@map("partidos")
+}
+
+model Participante {
+  id        String   @id @default(cuid())
+  partidoId String
+  partido   Partido  @relation(fields: [partidoId], references: [id], onDelete: Cascade)
+  usuarioId String
+  usuario   User     @relation(fields: [usuarioId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([partidoId, usuarioId])
+  @@index([usuarioId])
+  @@map("participantes")
+}

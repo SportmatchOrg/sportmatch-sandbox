@@ -7,46 +7,73 @@ const PUBLIC_ORGANIZER = {
   select: { id: true, nombre: true, fotoUrl: true },
 } as const;
 
+const PUBLIC_DEPORTE = {
+  select: { id: true, nombre: true },
+} as const;
+
 const PARTICIPANT_COUNT = {
   select: { participantes: true },
 } as const;
 
-const PARTIDO_INCLUDE = {
-  organizador: PUBLIC_ORGANIZER,
-  _count: PARTICIPANT_COUNT,
+const PUBLIC_PARTICIPANTS = {
+  select: {
+    usuario: { select: { id: true, nombre: true, fotoUrl: true } },
+    createdAt: true,
+  },
+  orderBy: { createdAt: 'asc' },
 } as const;
+
+const partidoInclude = (usuarioId: string) =>
+  ({
+    organizador: PUBLIC_ORGANIZER,
+    deporte: PUBLIC_DEPORTE,
+    _count: PARTICIPANT_COUNT,
+    participantes: { where: { usuarioId }, select: { id: true } },
+  }) as const;
 
 @Injectable()
 export class PartidosRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findUpcoming() {
+  findUpcoming(usuarioId: string) {
     return this.prisma.partido.findMany({
       where: { fecha: { gte: new Date() } },
       orderBy: { fecha: 'asc' },
-      include: PARTIDO_INCLUDE,
+      include: partidoInclude(usuarioId),
     });
   }
 
-  findById(id: string) {
+  findById(id: string, usuarioId: string) {
     return this.prisma.partido.findUnique({
       where: { id },
-      include: PARTIDO_INCLUDE,
+      include: partidoInclude(usuarioId),
+    });
+  }
+
+  findDetailById(id: string) {
+    return this.prisma.partido.findUnique({
+      where: { id },
+      include: {
+        organizador: PUBLIC_ORGANIZER,
+        deporte: PUBLIC_DEPORTE,
+        _count: PARTICIPANT_COUNT,
+        participantes: PUBLIC_PARTICIPANTS,
+      },
     });
   }
 
   create(organizadorId: string, data: CreatePartidoDto) {
     return this.prisma.partido.create({
       data: { ...data, organizadorId },
-      include: PARTIDO_INCLUDE,
+      include: partidoInclude(organizadorId),
     });
   }
 
-  update(id: string, data: UpdatePartidoDto) {
+  update(id: string, usuarioId: string, data: UpdatePartidoDto) {
     return this.prisma.partido.update({
       where: { id },
       data,
-      include: PARTIDO_INCLUDE,
+      include: partidoInclude(usuarioId),
     });
   }
 
@@ -54,15 +81,15 @@ export class PartidosRepository {
     return this.prisma.partido.delete({ where: { id } });
   }
 
-  findParticipant(partidoId: string, usuarioId: string) {
-    return this.prisma.participante.findUnique({
-      where: { partidoId_usuarioId: { partidoId, usuarioId } },
-    });
-  }
-
   addParticipant(partidoId: string, usuarioId: string) {
     return this.prisma.participante.create({
       data: { partidoId, usuarioId },
+    });
+  }
+
+  removeParticipant(partidoId: string, usuarioId: string) {
+    return this.prisma.participante.delete({
+      where: { partidoId_usuarioId: { partidoId, usuarioId } },
     });
   }
 }

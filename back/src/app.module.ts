@@ -7,6 +7,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { PartidosModule } from './partidos/partidos.module';
+import { DeportesModule } from './deportes/deportes.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PartidosModule } from './partidos/partidos.module';
     FirebaseModule,
     UsersModule,
     PartidosModule,
+    DeportesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

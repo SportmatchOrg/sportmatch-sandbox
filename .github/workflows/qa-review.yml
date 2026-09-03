@@ -11,16 +11,18 @@ name: QA Review
 # QA, que edita, borra falsos positivos, agrega lo suyo y recién ahí elige
 # Approve / Comment / Request changes y hace Submit.
 #
-# Secrets necesarios en ESTE repo (secrets: inherit los pasa al workflow central):
+# Secrets necesarios en ESTE repo (pasados explícitos abajo, sin `secrets: inherit`):
 #   QA_GITHUB_TOKEN  Fine-grained PAT del QA. Una pending review solo la ve quien
 #                    la creó, así que tiene que ser el token de una persona.
 #                    Permisos: en este repo -> Contents: Read,
 #                              Pull requests: Read and write, Metadata: Read
 #                              en agents-copilot -> Contents: Read, Metadata: Read
-#   QA_LLM_API_KEY   API key de OpenRouter para ESTE agente. Va aparte de LLM_API_KEY
-#                    porque los otros agentes del paquete usan Gemini: si compartieran
-#                    secret, la key de uno rompería al otro. Si tu LLM_API_KEY ya es
-#                    del mismo proveedor, podés omitirlo y se usa esa.
+#   LLM_API_KEY      La misma que ya usan los otros agentes. Por defecto este
+#                    agente apunta a Gemini, igual que ellos, así que no hace
+#                    falta ninguna key nueva.
+#   QA_LLM_API_KEY   Opcional. Solo si querés que ESTE agente use otro proveedor
+#                    (ej. OpenRouter) sin tocar la key de los demás. Si está,
+#                    tiene prioridad sobre LLM_API_KEY.
 #   LINEAR_API_KEY   Opcional. Sin ella se omiten QA-01 (scope) y QA-05 (evidencia).
 #
 # Para cambiar de modelo no hace falta tocar código: se pasa `llm_model` acá abajo.
@@ -45,4 +47,8 @@ jobs:
     # Al marcarla "Ready for review" se dispara `ready_for_review` y corre.
     if: github.event.pull_request.draft == false
     uses: SportmatchOrg/agents-copilot/.github/workflows/qa-review-reusable.yml@main
-    secrets: inherit
+    secrets:
+      QA_GITHUB_TOKEN: ${{ secrets.QA_GITHUB_TOKEN }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      QA_LLM_API_KEY: ${{ secrets.QA_LLM_API_KEY }}
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}

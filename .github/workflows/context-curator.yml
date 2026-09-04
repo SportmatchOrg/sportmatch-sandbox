@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: SportmatchOrg/agents-copilot/.github/workflows/context-curator-reusable.yml@chore/reusables-context-dod-translator
+    uses: SportmatchOrg/agents-copilot/.github/workflows/context-curator-reusable.yml@main
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_PLANNING }}

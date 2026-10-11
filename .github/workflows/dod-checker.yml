@@ -11,8 +11,10 @@ jobs:
       contents: read
       pull-requests: write
       checks: read
-    uses: SportmatchOrg/agents-copilot/.github/workflows/dod-checker-reusable.yml@main
+    uses: SportmatchOrg/agents-copilot/.github/workflows/dod-checker-reusable.yml@chore/formato-comun-agentes
+    with:
+      agents_ref: chore/formato-comun-agentes
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      # Sin LINEAR_API_KEY en la prueba: si no, comentaría en un ticket real de Linear.
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_QA }}

@@ -10,7 +10,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: SportmatchOrg/agents-copilot/.github/workflows/pr-business-translator-reusable.yml@main
+    uses: SportmatchOrg/agents-copilot/.github/workflows/pr-business-translator-reusable.yml@chore/formato-comun-agentes
+    with:
+      agents_ref: chore/formato-comun-agentes
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_QA }}

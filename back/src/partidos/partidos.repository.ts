@@ -30,7 +30,7 @@ export class PartidosRepository {
 
   // Prueba de los agentes de PR: SQL crudo interpolado (BL-05 del Security Agent).
   searchByUbicacion(texto: string) {
-    return this.prisma.$queryRaw`SELECT id FROM "Partido" WHERE ubicacion ILIKE '%${texto}%'`;
+    return this.prisma.$queryRaw`SELECT id FROM "Partido" WHERE ubicacion ILIKE ${`%${texto}%`}`;
   }
 
   findById(id: string) {
